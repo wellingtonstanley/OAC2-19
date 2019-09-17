@@ -115,16 +115,10 @@
 	
 	#Função que inverte as cores da imagem através da subtração entre o valor 255 e os componentes RGB, retornando o negativo da mesma 
 	.macro convert_negative()
-		jal 	abrir_arquivo
-		
+		mv 	t1, a1	#t1=a1 copiar base da heap para t1
 		convert_negative:
 			beq 	a3, zero, close		#verifica se o contador de pixels da imagem chegou a 0
-		
-			#chamada de sistema para leitura de arquivo
-			#parâmetros da chamada de sistema: a7=63, a0=descritor do arquivo, a1 = endereço do buffer, a2 = máximo tamanho pra ler
-			li	 a7, 63			# definição da chamada de sistema para leitura de arquivo 
-			ecall            		# lê o arquivo
-			lw	 t0, 0(a1)   		# lê pixel do buffer
+			lw	 t0, 0(t1)   		# lê pixel do display
 			li	 t2, 255 		#Atribui o valor 255 ao t2 
 			sub	 t0, t2, t0 		#t0 = t2 - t0 --> t0 = 255(que � transformado pra hexa pelo rars) - (hexadecimal do pixel atual)
 			sw	 t0, 0(t1)   		# escreve pixel no display
@@ -135,17 +129,12 @@
 	.end_macro
 	
 	.macro convert_readtones()
-		jal	abrir_arquivo
+		mv 	t1, a1	#t1=a1 copiar base da heap para t1
+		
 		#função que converte para zero os componentes G e B do ponto, mantendo somente ativo o componente R
-		convert_redtones: 
-		
+		convert_redtones:
 			beq a3, zero, close		#verifica se o contador de pixels da imagem chegou a 0
-		
-			#chamada de sistema para leitura de arquivo
-			#parâmetros da chamada de sistema: a7=63, a0=descritor do arquivo, a1 = endereço do buffer, a2 = máximo tamanho pra ler
-			li a7, 63				# definição da chamada de sistema para leitura de arquivo 
-			ecall            		# lê o arquivo
-			lw   t0, 0(a1)   		# lê pixel do buffer
+			lw   t0, 0(t1)   		# lê pixel do display
 			li t2, 0x00ff0000		#Atribui o hexadecimal da cor vermelha ao t2
 			and t0, t2, t0 			#Faz um and bit a bit com o intuito de zerar todos os bits, menos os bits correspondentes a cor vermelha
 			sw   t0, 0(t1)   		# escreve pixel no display
@@ -301,17 +290,13 @@
 			
 	opcao_5:
 		# define parâmetros e chama a função para carregar a imagem
-		la a0, image_name
 		lw a1, address
-		la a2, buffer
 		lw a3, size
 		convert_negative()
 		
 	opcao_6:
 		# define parâmetros e chama a função para carregar a imagem
-		la a0, image_name
 		lw a1, address
-		la a2, buffer
 		lw a3, size
 		convert_readtones()
 	
