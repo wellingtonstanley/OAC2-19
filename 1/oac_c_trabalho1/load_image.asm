@@ -15,8 +15,6 @@
 	str_menu:   	.string "Digite a opção desejada:\n 1 - get_point\n 2 - draw_point\n 3 - draw_full_rectangle\n 4 - draw_empty_rectangle\n 5 – convert_negative\n 6 - convert_redtones\n 7 - load_image\n 8 - sair\n"	
 	str_opcao_1:   	.string "Informe os valores de x e y separados por enter:\n"
 	str_opcao_3_4:  .string "Informe os valores de xi, yi, xf, yf separados por enter:\n"
-	#vetor:		.word 0, 1, 2, 3, 4, 5, 6
-	tab:		.string "\n"
 	
 	image_name:   	.asciz "lenaeye.raw"	# nome da imagem a ser carregada
 	address: 	.word   0x10040000	# endereco do bitmap display na memoria	
@@ -24,7 +22,26 @@
 	size:		.word	4096		# numero de pixels da imagem
 
 .text
-	 
+	#-------------------------------------------------------------------------
+	# Função get_point: carrega um ponto a partir de uma coordenada informada
+	# pelo usuário, retornando assim os valores R, G e B em hexadecimal na
+	# saída padrão.
+	#
+	# Parametros:
+	#  $x: inteiro, coordenada do eixo vertical, ou seja, indica qual coluna
+	#  $y: inteiro, coordenada do eixo horizontal, ou seja, indica qual linha
+	#
+	# A função recebe os dois parametros que são o par ordenado x,y que juntos
+	# indicam a localização do ponto desejado. É feita uma multiplicação por
+	# 4 no x e por 256 no y usando ssli. Após isso, tanto o x quanto o y são
+	# adicionados ao endereço base da heap para, assim, encontrar o ponto com
+	# exatidão e em seguida carregá-lo em uma word. Posteriormente, 1 byte será
+	# carregado por vez: R, G e B, respectivamente, pela instrução. O R é o 
+	# terceiro byte e por isso tem 2 adicionado ao endereço base da word, e para
+	# sua exibição em hexadecimal há um shift para a esquerda de 16 bits. O mesmo 
+	# ocorre com o G mas, por ser o segundo byte, tem 1 adicionado ao endereço 
+	# base e para hexadecimal um shitf para a esquerda de 8 bits. O B já está em 
+	# conformidade. Por fim, são exibidos os valores R, G e B em hexadecimal. 
 	.macro get_point($x, $y)
 		li	t1, 63		#como o display é invertido o calculo para y's será 63-y
 		sub	t1, t1, $y	#63-y = posicao da linha informada
@@ -142,7 +159,7 @@
 		sub	a2, s0, s2	#número de colunas que serão preenchidas
 		sub	a3, s3, s1	#número de linhas que serão preenchidas
 		addi	a2, a2, 1	#o total de colunas vai de 0 a X+1
-		addi 	a3, a3, 1	#o total de linhas vai de 0 a X+1
+		addi 	a3, a3, 1	#o total de linhas vai de 0 a Y+1
 		
 		mul  	t1, a2,	a3	#número de iterações para preenchimento Xi colunas x Yi linhas 
 		mv	t2, t0		#copia o endereço do ponto superior direito para t2
@@ -187,23 +204,25 @@
 		
 		sub	a2, s2, s0	#número de colunas que serão preenchidas
 		sub	a3, s1, s3	#número de linhas que serão preenchidas
+		slli	s1, a2, 2	#numero de colunas x 4 bytes representará cada ponto vertical esquerdo
+		addi	a2, a2, 1	#o total de colunas vai de 0 a X+1
+		addi 	a3, a3, 1	#o total de linhas vai de 0 a Y+1
 		
 		mv  	t1, a3		#número de iterações para preenchimento de Y linhas 
 		mv	t0, t2		#copia o endereço do ponto superior direito para t2
 		mv	t3, a2
 		li	s0, 1
-		li	s1, 1
 
 		draw_empty_rectangle:
-			beq 	t1, zero, clear	# se todo a area foi preenchida retorna para o menu
-			beq	t1, a3, draw_full_line
-			beq	t1, s0, draw_full_line
-			sw 	s4, 0(t2)	#armazena o conteudo RGB informado no ponto xy do display
-			sub	t2, t2, a2	#próximo pixel a esquerda para ser preenchido
-			sw	s4, 0(t2)
+			beq 	t1, zero, clear	# se toda o contorno for preenchido retorna para o menu
+			beq	t1, a3, draw_full_line #se esta na primeira linha t1=a3, preenche toda linha
+			sw 	s4, 0(t2)	#armazena o conteudo RGB informado no ponto xy da borda mais a direita
+			sub	t2, t2, s1	#próximo pixel a esquerda para ser preenchido
+			sw	s4, 0(t2)	#armazena o conteudo RGB informado no ponto xy da borda mais esquerda 
 			addi	t1, t1, -1	#decrementa a quantidade de iterações= número de pontos xy
 			addi	t0, t0, 256	#endereço base + 256 = próxima linha
-			mv	t2, t0
+			mv	t2, t0		#t2=t0
+			beq	t1, s0, draw_full_line #se esta na ultima linha t1=s0, preenche toda linha
 					
 			j	draw_empty_rectangle
 		
@@ -212,10 +231,10 @@
 			addi	t2, t2, -4	#próximo pixel a esquerda para ser preenchido
 			addi	t3, t3, -1	#decrementa a quantidade de iterações= número de colunas
 			bgt 	t3, zero, draw_full_line # se todo a area foi preenchida retorna para o menu
-			mv	t3, a2		#t3
-			addi	t1, t1, -1
-			addi	t0, t0, 256	#endereço base + 256 = próxima linha
-			mv	t2, t0
+			mv	t3, a2		#t3= total de colunas para preencher outra linha em outro loop
+			addi	t1, t1, -1	#decrementa a quantidade de iterações= número de pontos xy
+			addi	t0, t0, 256	#t0 = endereço base + 256 = próxima linha
+			mv	t2, t0		#t2= t0
 			j	draw_empty_rectangle
 			
 	.end_macro
@@ -271,7 +290,7 @@
 		#loop utilizado para ler pixel a pixel da imagem
 		loop:  
 		
-			beq  	$size, zero, close		#verifica se o contador de pixels da imagem chegou a 0
+			beq  	$size, zero, close	#verifica se o contador de pixels da imagem chegou a 0
 
 			#chamada de sistema para leitura de arquivo
 			#parÃ¢metros da chamada de sistema: a7=63, a0=descritor do arquivo, a1 = endereÃ§o do buffer, a3 = mÃ¡ximo tamanho pra ler
@@ -291,7 +310,8 @@
 		li 	a7, 5		#a7=5 -> definiÃ§Ã£o da chamada de sistema para ler opcao do usuario
 		ecall			#realiza a chamada de sistema
 		mv 	t0, a0
-			
+		
+		#de acordo com a opcao informada pelo usuario alguma opcao será acionada	
 		li	t1, 1
 		beq 	t0, t1, opcao_1
 		li 	t1, 2
@@ -327,7 +347,7 @@
 		li	t0, 0
 		li	t1, 0
 		li	t2, 0
-			
+		#retorna para o menu	
 		j 	main
 	
 	exibe_menu:
@@ -347,7 +367,7 @@
 		
 		li 	a7, 5		#chamada de sistema para ler y
 		ecall			#chamada de sistema
-		mv 	t1, a0		#t0=y
+		mv 	t1, a0		#t1=y
 				
 		get_point(t0, t1)
 		
@@ -358,11 +378,11 @@
 		
 		li 	a7, 5		#chamada de sistema para ler x
 		ecall			#chamada de sistema
-		mv 	a1, a0		#t0=x
+		mv 	a1, a0		#a1=x
 		
 		li 	a7, 5		#chamada de sistema para ler y
 		ecall			#chamada de sistema
-		mv 	a2, a0		#t0=y
+		mv 	a2, a0		#a2=y
 		
 		jal ler_valores_rgb
 
@@ -453,8 +473,8 @@
 		la	a0, str_enter
 		ecall
 		
-		or 	a3, t1, a3		#ou para unir G+B no formato 0x0000FFFF
-		or 	a3, t0, a3		#ou para unir R+(G+B) no formato 0x00FFFFFF
+		or 	a3, t1, a3	#ou para unir G+B no formato 0x0000FFFF
+		or 	a3, t0, a3	#ou para unir R+(G+B) no formato 0x00FFFFFF
 		
 		jr	ra
 		
@@ -473,11 +493,11 @@
 		
 		li 	a7, 5		#chamada de sistema para ler xf
 		ecall			#chamada de sistema
-		mv 	t2, a0		#t0=xf
+		mv 	t2, a0		#t2=xf
 		
 		li 	a7, 5		#chamada de sistema para ler yf
 		ecall			#chamada de sistema
-		mv 	t3, a0		#t1=yf
+		mv 	t3, a0		#t3=yf
 		
 		jr	ra
 
@@ -494,24 +514,3 @@
 		li	t2, 0
 		li	t3, 0
 		j	main
-
-#-------------------------------------------------------------------------
-	# Função get_point: carrega um ponto a partir de uma coordenada informada
-	# pelo usuário, retornando assim os valores R, G e B em hexadecimal na
-	# saída padrão.
-	#
-	# Parametros:
-	#  $x: inteiro, coordenada do eixo vertical, ou seja, indica qual coluna
-	#  $y: inteiro, coordenada do eixo horizontal, ou seja, indica qual linha
-	#
-	# A função recebe os dois parametros que são o par ordenado x,y que juntos
-	# indicam a localização do ponto desejado. É feita uma multiplicação por
-	# 4 no x e por 256 no y usando ssli. Após isso, tanto o x quanto o y são
-	# adicionados ao endereço base da heap para, assim, encontrar o ponto com
-	# exatidão e em seguida carregá-lo em uma word. Posteriormente, 1 byte será
-	# carregado por vez: R, G e B, respectivamente, pela instrução. O R é o 
-	# terceiro byte e por isso tem 2 adicionado ao endereço base da word, e para
-	# sua exibição em hexadecimal há um shift para a esquerda de 16 bits. O mesmo 
-	# ocorre com o G mas, por ser o segundo byte, tem 1 adicionado ao endereço 
-	# base e para hexadecimal um shitf para a esquerda de 8 bits. O B já está em 
-	# conformidade. Por fim, são exibidos os valores R, G e B em hexadecimal.
