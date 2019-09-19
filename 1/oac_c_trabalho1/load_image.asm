@@ -2,8 +2,8 @@
 #		Organização e Arquitetura de Computadores - Turma C 
 #			Trabalho 1 - Assembly RISC-V
 #
-# Nome: Anne 				Matrícula: 
-# Nome: Gabriel				Matrícula: 
+# Nome: Anne Carolina Borges				Matrícula: 14/0016546
+# Nome: Gabriel	Crespo de Souza 			Matrícula: 14/0139982 
 # Nome: Wellington Stanley				Matrícula: 11/0143981
 
 .data
@@ -43,65 +43,65 @@
 	# base e para hexadecimal um shitf para a esquerda de 8 bits. O B já está em 
 	# conformidade. Por fim, são exibidos os valores R, G e B em hexadecimal.
 	.macro get_point($x, $y)
-		li	t1, 63		#como o display é invertido o calculo para y's será 63-y
-		sub	t1, t1, $y	#63-y = posicao da linha informada
-		slli 	t0, $x, 2  	#posicao X x 4 = coordenada dada para coluna
-		slli 	t1, t1, 8  	#posicao Y x 256 = coordenada dada para linha
+		li	t1, 63		# como o display é invertido o calculo para y's será 63-y
+		sub	t1, t1, $y	# 63-y = posicao da linha informada
+		slli 	t0, $x, 2  	# posicao X x 4 = coordenada dada para coluna
+		slli 	t1, t1, 8  	# posicao Y x 256 = coordenada dada para linha
 
-		add 	t2, zero, t1	#calcular linha t2 = Y x 256
-		add 	t2, t2, t0	#calcular coluna t2 = (X x 4) + Y x 256
-		lw 	a1, address	#endereço base heap para a1
+		add 	t2, zero, t1	# calcular linha t2 = Y x 256
+		add 	t2, t2, t0	# calcular coluna t2 = (X x 4) + Y x 256
+		lw 	a1, address	# endereço base heap para a1
 		
-		add 	t2, t2, a1	#posicao do ponto xy = endereço base + t2
+		add 	t2, t2, a1	# posicao do ponto xy = endereço base + t2
 		
-		lw 	t1, 0(t2)	#carrega o conteudo = o ponto xy na heap para t1
-		mv	a0, t1		#conteúdo do ponto para a0
-		li	a7, 34		#imprime o valor hex RGB do ponto
+		lw 	t1, 0(t2)	# carrega o conteudo = o ponto xy na heap para t1
+		mv	a0, t1		# conteúdo do ponto para a0
+		li	a7, 34		# imprime o valor hex RGB do ponto
 		ecall
 		
 		li	a7, 4
-		la	a0, str_enter	#imprime quebra de linha
+		la	a0, str_enter	# imprime quebra de linha
 		ecall
 
 		li	a7, 4
-		la	a0, str_valor_r #imprime texto de valor do R:
+		la	a0, str_valor_r # imprime texto de valor do R:
 		ecall
 		
-		lbu  	t1, 2(t2)	#carrega o 3 byte=R com extensao de 0's a esquerda para t1
-		slli 	t1, t1, 16	#move o byte para a posicao 16-23, por exemplo, de 0x000000FF para 0x00FF0000
+		lbu  	t1, 2(t2)	# carrega o 3 byte=R com extensao de 0's a esquerda para t1
+		slli 	t1, t1, 16	# move o byte para a posicao 16-23, por exemplo, de 0x000000FF para 0x00FF0000
 		mv 	a0, t1
-		li	a7, 34		#imprime o valor hex de R
+		li	a7, 34		# imprime o valor hex de R
 		ecall
 		
 		li	a7, 4
-		la	a0, str_enter	#imprime quebra de linha
+		la	a0, str_enter	# imprime quebra de linha
 		ecall
 
 		li	a7, 4
-		la	a0, str_valor_g	#imprime o texto de valor do G:
+		la	a0, str_valor_g	# imprime o texto de valor do G:
 		ecall
 				
-		lbu  	t1, 1(t2)	#carrega o 2 byte=G com extensao de 0's a esquerda para t1
-		slli 	t1, t1, 8	#move o byte para a posicao 8-15, por exemplo, de 0x000000FF para 0x000FF00
+		lbu  	t1, 1(t2)	# carrega o 2 byte=G com extensao de 0's a esquerda para t1
+		slli 	t1, t1, 8	# move o byte para a posicao 8-15, por exemplo, de 0x000000FF para 0x000FF00
 		mv 	a0, t1
-		li	a7, 34		#imprime o valor hex de G
+		li	a7, 34		# imprime o valor hex de G
 		ecall
 		
 		li	a7, 4
-		la	a0, str_enter	#imprime quebra de linha
+		la	a0, str_enter	# imprime quebra de linha
 		ecall
 		
 		li	a7, 4
-		la	a0, str_valor_b	#imprime o texto de valor de B
+		la	a0, str_valor_b	# imprime o texto de valor de B
 		ecall
 		
-		lbu 	t1, 0(t2)	#carrega o 1 byte=B com extensao de 0's a esquerda para t1
+		lbu 	t1, 0(t2)	# carrega o 1 byte=B com extensao de 0's a esquerda para t1
 		mv 	a0, t1
-		li	a7, 34		#imprime o valor hex de B
+		li	a7, 34		# imprime o valor hex de B
 		ecall
 		
 		li	a7, 4
-		la	a0, str_enter	#imprime quebra de linha
+		la	a0, str_enter	# imprime quebra de linha
 		ecall
 		
 		#	zerando registradores temporários +- clean
@@ -129,17 +129,17 @@
 	# exatidão e em seguida armazená-lo em uma word que indica o endereço da posição no display.
 	# Assim, o ponto é inserido e, por fim, as variaveis utilizadas são zeradas.
 	.macro draw_point($x, $y, $val)
-		li	t1, 63		#como o display é invertido o calculo para y's será 63-y
-		sub	t1, t1, $y	#63-y = posicao da linha informada
-		slli 	t0, $x, 2  	#posicao X x 4 = coordenada dada para coluna
-		slli 	t1, t1, 8  	#posicao Y x 256 = coordenada dada para linha
+		li	t1, 63		# como o display é invertido o calculo para y's será 63-y
+		sub	t1, t1, $y	# 63-y = posicao da linha informada
+		slli 	t0, $x, 2  	# posicao X x 4 = coordenada dada para coluna
+		slli 	t1, t1, 8  	# posicao Y x 256 = coordenada dada para linha
 
-		add 	t2, t2, t1	#calcular linha t3 = X x 4
-		add 	t2, t2, t0	#calcular coluna t3 = (X x 4) + Y x 256
-		lw 	a1, address	#endereço base heap para a1
+		add 	t2, t2, t1	# calcular linha t3 = X x 4
+		add 	t2, t2, t0	# calcular coluna t3 = (X x 4) + Y x 256
+		lw 	a1, address	# endereço base heap para a1
 		
-		add 	t2, t2, a1	#posicao xy = endereço base + t2
-		sw 	$val, 0(t2)	#armazena o conteudo RGB informado no ponto xy do display
+		add 	t2, t2, a1	# posicao xy = endereço base + t2
+		sw 	$val, 0(t2)	# armazena o conteudo RGB informado no ponto xy do display
 		
 		#	zerando registradores temporários +- clean
 		li	t0, 0
@@ -178,29 +178,29 @@
 		add	s2, zero, $xf
 		add	s3, zero, $yf
 		add	s4, zero, $val
-		li	s5, 63		#como o display é invertido o calculo para y's será 63-y
+		li	s5, 63		# como o display é invertido o calculo para y's será 63-y
 		
-		sub	s1, s5, s1	#linha mais acima 63-yi = faz a coordenada yi ficar de acordo com o display 0 a 63
-		sub	s3, s5, s3	#linha mais abaixo 63-yf = faz a coordenada yf ficar de acordo com o display 0 a 63
+		sub	s1, s5, s1	# linha mais acima 63-yi = faz a coordenada yi ficar de acordo com o display 0 a 63
+		sub	s3, s5, s3	# linha mais abaixo 63-yf = faz a coordenada yf ficar de acordo com o display 0 a 63
 		
-		slli 	t0, $xi, 2  	#posicao X x 4 = coordenada dada para coluna do ponto a direita
-		slli 	t1, s1, 8  	#posicao Y x 256 = coordenada dada para linha superior
-		slli 	t2, $xf, 2  	#posicao X x 4 = coordenada dada para coluna do ponto a esquerda
-		slli 	t3, s3, 8  	#posicao Y x 256 = coordenada dada para linha inferior
+		slli 	t0, $xi, 2  	# posicao X x 4 = coordenada dada para coluna do ponto a direita
+		slli 	t1, s1, 8  	# posicao Y x 256 = coordenada dada para linha superior
+		slli 	t2, $xf, 2  	# posicao X x 4 = coordenada dada para coluna do ponto a esquerda
+		slli 	t3, s3, 8  	# posicao Y x 256 = coordenada dada para linha inferior
 
-		add 	t0, t0, t1	##calcular ponto direito superior t0 = (xi x 4) + yi x 256
-		add 	t1, t2, t3	#calcular ponto esquerdo inferior t1 = (xf x 4) + yf x 256
-		lw 	a1, address	#endereço base heap para a1
+		add 	t0, t0, t1	# calcular ponto direito superior t0 = (xi x 4) + yi x 256
+		add 	t1, t2, t3	# calcular ponto esquerdo inferior t1 = (xf x 4) + yf x 256
+		lw 	a1, address	# endereço base heap para a1
 		
-		add 	t0, t0, a1	#posicao xiyi = endereço base + t0
+		add 	t0, t0, a1	# posicao xiyi = endereço base + t0
 		
-		sub	a2, s0, s2	#número de colunas que serão preenchidas
-		sub	a3, s3, s1	#número de linhas que serão preenchidas
-		addi	a2, a2, 1	#o total de colunas vai de 0 a X+1
-		addi 	a3, a3, 1	#o total de linhas vai de 0 a Y+1
+		sub	a2, s0, s2	# número de colunas que serão preenchidas
+		sub	a3, s3, s1	# número de linhas que serão preenchidas
+		addi	a2, a2, 1	# o total de colunas vai de 0 a X+1
+		addi 	a3, a3, 1	# o total de linhas vai de 0 a Y+1
 		
-		mul  	t1, a2,	a3	#número de iterações para preenchimento Xi colunas x Yi linhas 
-		mv	t2, t0		#copia o endereço do ponto superior direito para t2
+		mul  	t1, a2,	a3	# número de iterações para preenchimento Xi colunas x Yi linhas 
+		mv	t2, t0		# copia o endereço do ponto superior direito para t2
 		li	t3, 0
 		
 		# Loop que desenha todo o retangulo no display
@@ -213,13 +213,13 @@
 		# a direita(t0). Quando as iterações acabam a função clear é chamada.
 		draw_full_rectangle:
 			beq 	t1, zero, clear	# se todo a area foi preenchida retorna para o menu
-			sw 	s4, 0(t2)	#armazena o conteudo RGB informado no ponto xy do display
-			addi	t2, t2, -4	#próximo pixel a esquerda para ser preenchido
-			addi	t1, t1, -1	#decrementa a quantidade de iterações= número de pontos xy
-			addi	t3, t3, 1	#controla quantas colunas deve preencher por iteração
-			blt	t3, a2, draw_full_rectangle #enquanto as iterações de coluna não finaliza, preencha o retangulo 
-			li	t3, 0		#zera o contador de iterações para a próxima linha
-			addi	t0, t0, 256	#endereço base + 256 = próxima linha
+			sw 	s4, 0(t2)	# armazena o conteudo RGB informado no ponto xy do display
+			addi	t2, t2, -4	# próximo pixel a esquerda para ser preenchido
+			addi	t1, t1, -1	# decrementa a quantidade de iterações= número de pontos xy
+			addi	t3, t3, 1	# controla quantas colunas deve preencher por iteração
+			blt	t3, a2, draw_full_rectangle # enquanto as iterações de coluna não finaliza, preencha o retangulo 
+			li	t3, 0		# zera o contador de iterações para a próxima linha
+			addi	t0, t0, 256	# endereço base + 256 = próxima linha
 			mv	t2, t0		
 
 			j 	draw_full_rectangle
@@ -256,31 +256,31 @@
 		add	s2, zero, $xf
 		add	s3, zero, $yf
 		add	s4, zero, $val
-		li	s5, 63		#como o display é invertido o calculo para y's será 63-y
+		li	s5, 63		# como o display é invertido o calculo para y's será 63-y
 		
-		sub	s1, s5, s1	#linha mais abaixo 63-yi = faz a coordenada yi ficar de acordo com o display 0 a 63
-		sub	s3, s5, s3	#linha mais abaixo 63-yf = faz a coordenada yf ficar de acordo com o display 0 a 63
+		sub	s1, s5, s1	# linha mais abaixo 63-yi = faz a coordenada yi ficar de acordo com o display 0 a 63
+		sub	s3, s5, s3	# linha mais abaixo 63-yf = faz a coordenada yf ficar de acordo com o display 0 a 63
 		
-		slli 	t0, $xi, 2  	#posicao X x 4 = coordenada dada para coluna do ponto a esquerda
-		slli 	t1, s1, 8  	#posicao Y x 256 = coordenada dada para linha inferior
-		slli 	t2, $xf, 2  	#posicao X x 4 = coordenada dada para coluna do ponto a direita
-		slli 	t3, s3, 8  	#posicao Y x 256 = coordenada dada para linha superior
+		slli 	t0, $xi, 2  	# posicao X x 4 = coordenada dada para coluna do ponto a esquerda
+		slli 	t1, s1, 8  	# posicao Y x 256 = coordenada dada para linha inferior
+		slli 	t2, $xf, 2  	# posicao X x 4 = coordenada dada para coluna do ponto a direita
+		slli 	t3, s3, 8  	# posicao Y x 256 = coordenada dada para linha superior
 
-		add 	t0, t0, t1	#calcular coluna t0 = (xi x 4) + yi x 256
-		add 	t1, t2, t3	#calcular coluna t1 = (xf x 4) + yf x 256
-		lw 	a1, address	#endereço base heap para a1
+		add 	t0, t0, t1	# calcular coluna t0 = (xi x 4) + yi x 256
+		add 	t1, t2, t3	# calcular coluna t1 = (xf x 4) + yf x 256
+		lw 	a1, address	# endereço base heap para a1
 		
-		add 	t0, t0, a1	#posicao xiyi = endereço base + t0
-		add 	t2, t1, a1	#posicao xfyf = endereço base + t1
+		add 	t0, t0, a1	# posicao xiyi = endereço base + t0
+		add 	t2, t1, a1	# posicao xfyf = endereço base + t1
 		
-		sub	a2, s2, s0	#número de colunas que serão preenchidas
-		sub	a3, s1, s3	#número de linhas que serão preenchidas
-		slli	s1, a2, 2	#numero de colunas x 4 bytes representará cada ponto vertical esquerdo
-		addi	a2, a2, 1	#o total de colunas vai de 0 a X+1
-		addi 	a3, a3, 1	#o total de linhas vai de 0 a Y+1
+		sub	a2, s2, s0	# número de colunas que serão preenchidas
+		sub	a3, s1, s3	# número de linhas que serão preenchidas
+		slli	s1, a2, 2	# numero de colunas x 4 bytes representará cada ponto vertical esquerdo
+		addi	a2, a2, 1	# o total de colunas vai de 0 a X+1
+		addi 	a3, a3, 1	# o total de linhas vai de 0 a Y+1
 		
-		mv  	t1, a3		#número de iterações para preenchimento de Y linhas 
-		mv	t0, t2		#copia o endereço do ponto superior direito para t2
+		mv  	t1, a3		# número de iterações para preenchimento de Y linhas 
+		mv	t0, t2		# copia o endereço do ponto superior direito para t2
 		mv	t3, a2
 		li	s0, 1
 		
@@ -292,14 +292,14 @@
 		# Se for a primeira ou última linha uma função para preencher a linha é acionada=draw_full_line.
 		draw_empty_rectangle:
 			beq 	t1, zero, clear	# se toda o contorno for preenchido retorna para o menu
-			beq	t1, a3, draw_full_line #se esta na primeira linha t1=a3, preenche toda linha
-			sw 	s4, 0(t2)	#armazena o conteudo RGB informado no ponto xy da borda mais a direita
-			sub	t2, t2, s1	#próximo pixel a esquerda para ser preenchido
-			sw	s4, 0(t2)	#armazena o conteudo RGB informado no ponto xy da borda mais esquerda 
-			addi	t1, t1, -1	#decrementa a quantidade de iterações= número de linhas
-			addi	t0, t0, 256	#endereço base + 256 = próxima linha
-			mv	t2, t0		#t2=t0
-			beq	t1, s0, draw_full_line #se esta na ultima linha t1=s0, preenche toda linha
+			beq	t1, a3, draw_full_line # se esta na primeira linha t1=a3, preenche toda linha
+			sw 	s4, 0(t2)	# armazena o conteudo RGB informado no ponto xy da borda mais a direita
+			sub	t2, t2, s1	# próximo pixel a esquerda para ser preenchido
+			sw	s4, 0(t2)	# armazena o conteudo RGB informado no ponto xy da borda mais esquerda 
+			addi	t1, t1, -1	# decrementa a quantidade de iterações= número de linhas
+			addi	t0, t0, 256	# endereço base + 256 = próxima linha
+			mv	t2, t0		# t2=t0
+			beq	t1, s0, draw_full_line # se esta na ultima linha t1=s0, preenche toda linha
 					
 			j	draw_empty_rectangle
 
@@ -312,78 +312,116 @@
 		# e retorna para a função que preenche os pontos a esquerda e direita= draw_empty_rectangle.
 
 		draw_full_line:
-			sw 	s4, 0(t2)	#armazena o conteudo RGB informado no ponto xy do display
-			addi	t2, t2, -4	#próximo pixel a esquerda para ser preenchido
-			addi	t3, t3, -1	#decrementa a quantidade de iterações= número de colunas
+			sw 	s4, 0(t2)	# armazena o conteudo RGB informado no ponto xy do display
+			addi	t2, t2, -4	# próximo pixel a esquerda para ser preenchido
+			addi	t3, t3, -1	# decrementa a quantidade de iterações= número de colunas
 			bgt 	t3, zero, draw_full_line # se todo a area foi preenchida retorna para o menu
-			mv	t3, a2		#t3= total de colunas para preencher outra linha em outro loop
-			addi	t1, t1, -1	#decrementa a quantidade de iterações= número linhas
-			addi	t0, t0, 256	#t0 = endereço base + 256 = próxima linha
-			mv	t2, t0		#t2= t0
+			mv	t3, a2		# t3= total de colunas para preencher outra linha em outro loop
+			addi	t1, t1, -1	# decrementa a quantidade de iterações= número linhas
+			addi	t0, t0, 256	# t0 = endereço base + 256 = próxima linha
+			mv	t2, t0		# t2= t0
 			j	draw_empty_rectangle
 			
 	.end_macro
 	
-	#FunÃ§Ã£o que inverte as cores da imagem atravÃ©s da subtraÃ§Ã£o entre o valor 255 e os componentes RGB, retornando o negativo da mesma 
+	#-------------------------------------------------------------------------------------------------
+	# Função convert_negative: função que inverte as cores da imagem atravÃ©s da subtração entre o valor 255 
+	# e os componentes RGB, retornando o negativo da mesma.
+	#
+	# A função não recebe parâmetros de entrada
+	#
+	# O funcionamento da função é baseado em um loop que percorre o display e a cada iteração
+	# operamos sobre os componentes RGB do pixel. Uma operação de subtração é realizada
+	# entre o valor 255 e o valor que representa os componentes RGB do pixel, com a finalidade de se inverter as cores
+	# do pixel. Após ser realizada a subtração, o novo valor obtido é gravado no endereço de memória
+	# correspondente ao pixel modificado. Depois acrescenta-se 4 ao endereço de memória que estavamos
+	# e verifica-se se chegamos ao final do bitmap, enquanto não chegarmos, repete-se o procedimento.
+	# Esse comportamento é realizado 4096 vezes, ou seja, até que se chegue ao fim do bitmap display.
+	#
+	# É importante salientar que a função não recebe parâmetros, então ao ser chamada pelo usuário
+	# ela será executa diretamente e retornará ao menu solicitando uma nova escolha ao usuário.
 	.macro convert_negative()
-		mv 	t1, a1	#t1=a1 copiar base da heap para t1
+		mv 	t1, a1	# t1=a1 copiar base da heap para t1
 		convert_negative:
 			beq 	a3, zero, close		#verifica se o contador de pixels da imagem chegou a 0
-			lw	 t0, 0(t1)   		# lÃª pixel do display
-			li	 t2, 255 		#Atribui o valor 255 ao t2 
-			sub	 t0, t2, t0 		#t0 = t2 - t0 --> t0 = 255(que ï¿½ transformado pra hexa pelo rars) - (hexadecimal do pixel atual)
+			lw	 t0, 0(t1)   		# lê pixel do display
+			li	 t2, 255 		# Atribui o valor 255 ao t2 
+			sub	 t0, t2, t0 		# t0 = t2 - t0 --> t0 = 255(que ï¿½ transformado pra hexa pelo rars) - (hexadecimal do pixel atual)
 			sw	 t0, 0(t1)   		# escreve pixel no display
-			addi	 t1, t1, 4  		# prÃ³ximo pixel
+			addi	 t1, t1, 4  		# próximo pixel
 			addi	 a3, a3, -1  		# decrementa countador de pixels da imagem
 		
 			j convert_negative
 	.end_macro
 	
+	#-----------------------------------------------------------------------------
+	# Função convert_redtones: função que converte para zero os componentes G e B do ponto, 
+	# mantendo somente ativo somente o componente R.
+	#
+	# A função não recebe parâmetros.
+	#
+	# O funcionamento da função é baseado em um loop que percorre o display e a cada iteração
+	# operamos sobre os componentes RGB do pixel que foi carregado da memória. Uma operação AND é
+	# realizada entre o valor que representa o componente RGB e o valor 0xff0000 que representa a
+	# cor vermelha em hexadecimal. Essa operação irá zerar os valores que correspondem aos componentes
+	# GB, mantendo somente o componente R ativo. Essa operação é realizada com a finalidade de deixar
+	# a imagem ou o display em tons de vermelho.  Após ser realizada a AND, o novo valor obtido 
+	# é gravado no endereço de memória correspondente ao pixel modificado. 
+	# Depois acrescenta-se 4 ao endereço de memória que estavamos
+	# e verifica-se se chegamos ao final do bitmap, enquanto não chegarmos, repete-se o procedimento.
+	# Esse comportamento é realizado 4096 vezes, ou seja, até que se chegue ao fim do bitmap display.
+	#
+	# Uma observação importante é no caso em que operamos o valor 0xff0000 com o valor 0x000000, porque
+	# a cor não irá se alterar, que é correto, pois não queremos que a imagem seja totalmete pintada de
+	# vermelho e suma, mas queremos que ela seja transaformada para uma imagem com tons de vermelho
+	# e continue aparecendo.
+	#
+	# É importante salientar que a função não recebe parâmetros, então ao ser chamada pelo usuário
+	# ela será executa diretamente e retornará ao menu solicitando uma nova escolha ao usuário	
 	.macro convert_readtones()
-		mv 	t1, a1	#t1=a1 copiar base da heap para t1
+		mv 	t1, a1	# t1=a1 copiar base da heap para t1
 		
-		#funÃ§Ã£o que converte para zero os componentes G e B do ponto, mantendo somente ativo o componente R
 		convert_redtones:
-			beq a3, zero, close		#verifica se o contador de pixels da imagem chegou a 0
-			lw   t0, 0(t1)   		# lÃª pixel do display
-			li t2, 0x00ff0000		#Atribui o hexadecimal da cor vermelha ao t2
-			and t0, t2, t0 			#Faz um and bit a bit com o intuito de zerar todos os bits, menos os bits correspondentes a cor vermelha
+			beq a3, zero, close		# verifica se o contador de pixels da imagem chegou a 0
+			lw   t0, 0(t1)   		# lê pixel do display
+			li t2, 0x00ff0000		# Atribui o hexadecimal da cor vermelha ao t2
+			and t0, t2, t0 			# Faz um and bit a bit com o intuito de zerar todos os bits, menos os bits correspondentes a cor vermelha
 			sw   t0, 0(t1)   		# escreve pixel no display
-			addi t1, t1, 4  		# prÃ³ximo pixel
+			addi t1, t1, 4  		# próximo pixel
 			addi a3, a3, -1  		# decrementa countador de pixels da imagem
 		
 			j convert_redtones
 	.end_macro
 	
 	.macro load_image($image_name, $address, $buffer, $size)
-		# salva os parÃ¢metros da funÃ§ao nos temporÃ¡rios
+		# salva os parâmetros da função nos temporários
 		mv 	t0, $image_name	# nome do arquivo
 		mv 	t1, $address	# endereco de carga
 		mv 	t2, $buffer	# buffer para leitura de um pixel do arquivo
 	
 		# chamada de sistema para abertura de arquivo
-		#parÃ¢metros da chamada de sistema: a7=1024, a0=string com o diretÃ³rio da imagem, a1 = definiÃ§Ã£o de leitura/escrita
+		# parâmetros da chamada de sistema: a7=1024, a0=string com o diretório da imagem, a1 = definição de leitura/escrita
 		li 	a7, 1024	# chamada de sistema para abertura de arquivo
 		li 	a1, 0		# Abre arquivo para leitura (pode ser 0: leitura, 1: escrita)
-		ecall			# Abre um arquivo (descritor do arquivo Ã© retornado em a0)
+		ecall			# Abre um arquivo (descritor do arquivo é retornado em a0)
 		mv 	s0, a0		# salva o descritor do arquivo em s0
 	
 		mv 	a0, s0		# descritor do arquivo 
-		mv 	a1, t2		# endereÃ§o do buffer 
+		mv 	a1, t2		# endereço do buffer
 		li 	a2, 3		# largura do buffer
 
-		#loop utilizado para ler pixel a pixel da imagem
+		# loop utilizado para ler pixel a pixel da imagem
 		loop:  
 		
-			beq  	$size, zero, close	#verifica se o contador de pixels da imagem chegou a 0
+			beq  	$size, zero, close	# verifica se o contador de pixels da imagem chegou a 0
 
-			#chamada de sistema para leitura de arquivo
-			#parÃ¢metros da chamada de sistema: a7=63, a0=descritor do arquivo, a1 = endereÃ§o do buffer, a3 = mÃ¡ximo tamanho pra ler
-			li	a7, 63		# definiÃ§Ã£o da chamada de sistema para leitura de arquivo 
-			ecall            	# lÃª o arquivo
-			lw	t3, 0(a1)	# lÃª pixel do buffer	
+			# chamada de sistema para leitura de arquivo
+			# parâmetros da chamada de sistema: a7=63, a0=descritor do arquivo, a1 = endereço do buffer, a3 = máximo tamanho pra ler
+			li	a7, 63		# definição da chamada de sistema para leitura de arquivo 
+			ecall            	# lê o arquivo
+			lw	t3, 0(a1)	# lê pixel do buffer	
 			sw	t3, 0(t1)   	# escreve pixel no display
-			addi 	t1, t1, 4  	# prÃ³ximo pixel
+			addi 	t1, t1, 4  	# próximo pixel
 			addi 	$size, $size, -1  	# decrementa countador de pixels da imagem
 		
 			j loop
@@ -394,11 +432,11 @@
 	main:
 		jal exibe_menu
 	
-		li 	a7, 5		#a7=5 -> definiÃ§Ã£o da chamada de sistema para ler opcao do usuario
-		ecall			#realiza a chamada de sistema
+		li 	a7, 5		# a7=5 -> definição da chamada de sistema para ler opcao do usuario
+		ecall			# realiza a chamada de sistema
 		mv 	t0, a0
 		
-		#de acordo com a opcao informada pelo usuario alguma opcao será acionada	
+		# de acordo com a opcao informada pelo usuario alguma opcao será acionada	
 		li	t1, 1
 		beq 	t0, t1, opcao_1
 		li 	t1, 2
@@ -417,8 +455,8 @@
 		beq	t0, t1 sair
   	
   	sair:
-		#definiÃ§Ã£o da chamada de sistema para encerrar programa	
-		#parÃ¢metros da chamada de sistema: a7=10
+		# definição da chamada de sistema para encerrar programa	
+		# parâmetros da chamada de sistema: a7=10
 		li a7, 10		
 		ecall
 
@@ -426,53 +464,53 @@
 	# Fecha o arquivo após a utilização.
 	close:
 		# chamada de sistema para fechamento do arquivo
-		#parÃ¢metros da chamada de sistema: a7=57, a0=descritor do arquivo
+		# parâmetros da chamada de sistema: a7=57, a0=descritor do arquivo
 		li	a7, 57		# chamada de sistema para fechamento do arquivo
 		mv 	a0, s0		# descritor do arquivo a ser fechado
 		ecall		        # fecha arquivo
-		#	zerando registradores temporários +- clean
+		# zerando registradores temporários +- clean
 		li	t0, 0
 		li	t1, 0
 		li	t2, 0
-		#retorna para o menu	
+		# retorna para o menu	
 		j 	main
 		
 	# Label responsável por exibir as opções do menu e retornar para main.
 	exibe_menu:
-		li	a7, 4		#a7=4 -> definiÃ§Ã£o da chamada de sistema para imprimir strings na tela
-		la	a0, str_menu	#a0=endereÃ§o da string "str_menu"
-		ecall			#realiza a chamada de sistema
+		li	a7, 4		# a7=4 -> definiÃ§Ã£o da chamada de sistema para imprimir strings na tela
+		la	a0, str_menu	# a0=endereÃ§o da string "str_menu"
+		ecall			# realiza a chamada de sistema
 		jr 	ra
 
 	# Label responsável por obter os dados e passar para a função get_point.
 	opcao_1:
-		li	a7, 4		#chamada de sistema para imprimir string
-		la	a0, str_opcao_1	#a0=endereÃ§o da string
-		ecall			#realiza a chamada de sistema
+		li	a7, 4		# chamada de sistema para imprimir string
+		la	a0, str_opcao_1	# a0=endereÃ§o da string
+		ecall			# realiza a chamada de sistema
 		
-		li 	a7, 5		#chamada de sistema para ler x
-		ecall			#chamada de sistema
-		mv 	t0, a0		#t0=x
+		li 	a7, 5		# chamada de sistema para ler x
+		ecall			# chamada de sistema
+		mv 	t0, a0		# t0=x
 		
-		li 	a7, 5		#chamada de sistema para ler y
-		ecall			#chamada de sistema
-		mv 	t1, a0		#t1=y
+		li 	a7, 5		# chamada de sistema para ler y
+		ecall			# chamada de sistema
+		mv 	t1, a0		# t1=y
 				
 		get_point(t0, t1)
 	
 	# Label responsável por obter os dados e passar para a função draw_point.
 	opcao_2:
-		li	a7, 4		#chamada de sistema para imprimir string
-		la	a0, str_opcao_1	#a0=endereÃ§o da string
-		ecall			#realiza a chamada de sistema
+		li	a7, 4		# chamada de sistema para imprimir string
+		la	a0, str_opcao_1	# a0=endereÃ§o da string
+		ecall			# realiza a chamada de sistema
 		
-		li 	a7, 5		#chamada de sistema para ler x
-		ecall			#chamada de sistema
-		mv 	a1, a0		#a1=x
+		li 	a7, 5		# chamada de sistema para ler x
+		ecall			# chamada de sistema
+		mv 	a1, a0		# a1=x
 		
-		li 	a7, 5		#chamada de sistema para ler y
-		ecall			#chamada de sistema
-		mv 	a2, a0		#a2=y
+		li 	a7, 5		# chamada de sistema para ler y
+		ecall			# chamada de sistema
+		mv 	a2, a0		# a2=y
 		
 		jal ler_valores_rgb
 
@@ -481,40 +519,40 @@
 	# Label responsável por obter os dados através de funções auxiliares e passar para a 
 	# função draw_full_rectangle	
 	opcao_3:
-		#função que pega os valores xi's e yi's que serão informados pelo usuario
+		# função que pega os valores xi's e yi's que serão informados pelo usuario
 		jal ler_valores_xi_yi
-		#função que pega os valores RGB que serão informados pelo usuario
+		# função que pega os valores RGB que serão informados pelo usuario
 		jal ler_valores_rgb
-		#parametros retornados pela função acima: xi, yi, xf, yf, val
+		# parametros retornados pela função acima: xi, yi, xf, yf, val
 		draw_full_rectangle(a1, a2, t2, t3, a3)
 	
 	# Label responsável por obter os dados através de funções auxiliares e passar para a 
 	# função draw_empty_rectangle
 	opcao_4:
-		#função que pega os valores xi's e yi's que serão informados pelo usuario
+		# função que pega os valores xi's e yi's que serão informados pelo usuario
 		jal ler_valores_xi_yi
-		#função que pega os valores RGB que serão informados pelo usuario
+		# função que pega os valores RGB que serão informados pelo usuario
 		jal ler_valores_rgb
-		#parametros retornados pela função acima: xi, yi, xf, yf, val
+		# parametros retornados pela função acima: xi, yi, xf, yf, val
 		draw_empty_rectangle(a1, a2, t2, t3, a3)
 
 	# Label responsável por carregar parametros e chamar a função convert_negative.
 	opcao_5:
-		# define parÃ¢metros e chama a funÃ§Ã£o para carregar a imagem
+		# define parâmetros e chama a função para carregar a imagem
 		lw a1, address
 		lw a3, size
 		convert_negative()
 	
 	# Label responsável por carregar parametros e chamar a função convert_readtones
 	opcao_6:
-		# define parÃ¢metros e chama a funÃ§Ã£o para carregar a imagem
+		# define parâmetros e chama a função para carregar a imagem
 		lw a1, address
 		lw a3, size
 		convert_readtones()
 	
 	# Label responsável por carregar parametros e chamar a função load_image
 	opcao_7:
-		# define parÃ¢metros e chama a funÃ§Ã£o para carregar a imagem
+		# define parâmetros e chama a função para carregar a imagem
 		la a0, image_name
 		lw a1, address
 		la a2, buffer
@@ -530,38 +568,38 @@
 	# 3 - ler o valor B e armazenar em uma word de 32 bits
 	# 4 - efetuar um R or B or C para obter o RGB completo
 	ler_valores_rgb:
-		li	a7, 4		#chamada para solicitar valor de R
+		li	a7, 4		# chamada para solicitar valor de R
 		la	a0, str_valor_r	
 		ecall
 		
-		li	a7, 5		#leitura do valor inteiro de R
+		li	a7, 5		# leitura do valor inteiro de R
 		ecall
-		mv	t0, a0		#t0=a0 valor de R atribuido a t0
-		slli	t0, t0, 16	#move 16 bits para esquerda para o formato 0x00FF0000
+		mv	t0, a0		# t0=a0 valor de R atribuido a t0
+		slli	t0, t0, 16	# move 16 bits para esquerda para o formato 0x00FF0000
 		
-		li	a7, 4		#chamada para solicitar valor de G
+		li	a7, 4		# chamada para solicitar valor de G
 		la	a0, str_valor_g
 		ecall
 		
-		li	a7, 5		#leitura do valor inteiro de G
+		li	a7, 5		# leitura do valor inteiro de G
 		ecall
-		mv	t1, a0		#t1=a0 valor de G atribuido a t1
-		slli	t1, t1, 8	#move 8 bits para esquerda para o formato 0x0000FF00
+		mv	t1, a0		# t1=a0 valor de G atribuido a t1
+		slli	t1, t1, 8	# move 8 bits para esquerda para o formato 0x0000FF00
 		
-		li	a7, 4		#chamada para solicitar valor de B
+		li	a7, 4		# chamada para solicitar valor de B
 		la	a0, str_valor_b
 		ecall
 		
-		li	a7, 5		#leitura do valor inteiro de B
+		li	a7, 5		# leitura do valor inteiro de B
 		ecall
-		mv	a3, a0		#a3=a0 valor de B atribuido a a3
+		mv	a3, a0		# a3=a0 valor de B atribuido a a3
 		
 		li	a7, 4
 		la	a0, str_enter
 		ecall
 		
-		or 	a3, t1, a3	#ou para unir G+B no formato 0x0000FFFF
-		or 	a3, t0, a3	#ou para unir R+(G+B) no formato 0x00FFFFFF
+		or 	a3, t1, a3	# ou para unir G+B no formato 0x0000FFFF
+		or 	a3, t0, a3	# ou para unir R+(G+B) no formato 0x00FFFFFF
 		
 		jr	ra
 	
@@ -570,25 +608,25 @@
 	# por este rótulo fornecem as coordenadas de pontos iniciais e finais no
 	# display.
 	ler_valores_xi_yi:
-		li	a7, 4		#chamada de sistema para imprimir string
-		la	a0, str_opcao_3_4	#a0=endereÃ§o da string
-		ecall			#realiza a chamada de sistema
+		li	a7, 4		# chamada de sistema para imprimir string
+		la	a0, str_opcao_3_4	# a0=endereÃ§o da string
+		ecall			# realiza a chamada de sistema
 		
-		li 	a7, 5		#chamada de sistema para ler xi
-		ecall			#chamada de sistema
-		mv 	a1, a0		#a1=xi
+		li 	a7, 5		# chamada de sistema para ler xi
+		ecall			# chamada de sistema
+		mv 	a1, a0		# a1=xi
 		
-		li 	a7, 5		#chamada de sistema para ler yi
-		ecall			#chamada de sistema
-		mv 	a2, a0		#a2=yi
+		li 	a7, 5		# chamada de sistema para ler yi
+		ecall			# chamada de sistema
+		mv 	a2, a0		# a2=yi
 		
-		li 	a7, 5		#chamada de sistema para ler xf
-		ecall			#chamada de sistema
-		mv 	t2, a0		#t2=xf
+		li 	a7, 5		# chamada de sistema para ler xf
+		ecall			# chamada de sistema
+		mv 	t2, a0		# t2=xf
 		
-		li 	a7, 5		#chamada de sistema para ler yf
-		ecall			#chamada de sistema
-		mv 	t3, a0		#t3=yf
+		li 	a7, 5		# chamada de sistema para ler yf
+		ecall			# chamada de sistema
+		mv 	t3, a0		# t3=yf
 		
 		jr	ra
 
