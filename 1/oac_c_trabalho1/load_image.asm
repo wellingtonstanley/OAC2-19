@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
-#		OrganizaÃ§Ã£o e Arquitetura de Computadores - Turma C 
+#		Organização e Arquitetura de Computadores - Turma C 
 #			Trabalho 1 - Assembly RISC-V
 #
-# Nome: Anne 				MatrÃ­cula: 
-# Nome: Gabriel				MatrÃ­cula: 
-# Nome: Wellington Stanley				MatrÃ­cula: 11/0143981
+# Nome: Anne 				Matrícula: 
+# Nome: Gabriel				Matrícula: 
+# Nome: Wellington Stanley				Matrícula: 11/0143981
 
 .data
 
@@ -41,7 +41,7 @@
 	# sua exibição em hexadecimal há um shift para a esquerda de 16 bits. O mesmo 
 	# ocorre com o G mas, por ser o segundo byte, tem 1 adicionado ao endereço 
 	# base e para hexadecimal um shitf para a esquerda de 8 bits. O B já está em 
-	# conformidade. Por fim, são exibidos os valores R, G e B em hexadecimal. 
+	# conformidade. Por fim, são exibidos os valores R, G e B em hexadecimal.
 	.macro get_point($x, $y)
 		li	t1, 63		#como o display é invertido o calculo para y's será 63-y
 		sub	t1, t1, $y	#63-y = posicao da linha informada
@@ -112,6 +112,22 @@
 		j main
 	.end_macro
 	
+	#-------------------------------------------------------------------------
+	# Função draw_point: desenha um ponto RGB no display. O ponto é desenhado
+	# a partir de uma coordenada informada pelo usuário. Além disso, a função
+	# também recebe o valor inteiro RGB.
+	#
+	# Parametros:
+	#  $x: inteiro, coordenada do eixo vertical, ou seja, indica qual coluna
+	#  $y: inteiro, coordenada do eixo horizontal, ou seja, indica qual linha
+	#  $val: inteiro, valor da cor em RGB que será desenhado no display
+	#
+	# A função recebe os três parametros que são o par ordenado x,y que juntos
+	# indicam a localização de onde o ponto será inserido. É feita uma 
+	# multiplicação por 4 no x e por 256 no y usando ssli. Após isso, tanto o x quanto o y são
+	# adicionados ao endereço base da heap para, assim, encontrar o ponto com
+	# exatidão e em seguida armazená-lo em uma word que indica o endereço da posição no display.
+	# Assim, o ponto é inserido e, por fim, as variaveis utilizadas são zeradas.
 	.macro draw_point($x, $y, $val)
 		li	t1, 63		#como o display é invertido o calculo para y's será 63-y
 		sub	t1, t1, $y	#63-y = posicao da linha informada
@@ -133,6 +149,29 @@
 		j	main
 	.end_macro
 	
+	#-------------------------------------------------------------------------
+	# Função draw_full_rectangle: desenha um retangulo com preenchimento no display.
+	# O retangulo é desenhado a partir de coordenadas informadas pelo usuário.
+	# Além disso, a função também recebe o valor inteiro RGB que será a cor do 
+	# preenchimento do retangulo.
+	#
+	# Parametros:
+	#  $xi: inteiro, coordenada do eixo vertical 1, ou seja, indica a coluna mais a direita
+	#  $yi: inteiro, coordenada do eixo horizontal 1, ou seja, indica a linha superior
+	#  $xf: inteiro, coordenada do eixo vertical 2, ou seja, indica a coluna mais a esquerda
+	#  $yf: inteiro, coordenada do eixo horizontal 2, ou seja, indica a linha inferior
+	#  $val: inteiro, valor da cor RGB do retangulo que será desenhado no display
+	#
+	# A função recebe os 5 parametros que são o par ordenado xi,yi que juntos
+	# indicam a localização do ponto superior direito e o par xf,yf que juntos indicam a 
+	# localização do ponto inferior esquerdo. Os dois pares formam o perímetro do retangulo.
+	# O quinto parâmetro é a cor do retangulo. É feita uma multiplicação por 4 no xi,xf e por
+	# 256 no yi,yf usando ssli para que representem o tamanho de words. Após isso, tanto o x's
+	# quanto o y's são adicionados ao endereço base da heap para, assim, encontrar os pontos com
+	# exatidão e em seguida armazená-los, cada um, em uma word que indica o endereço da posição no display.
+	# Posteriormente, é calculado o número de linhas(yf-yi) e colunas(xi-xf) a percorrer. Com esses
+	# resultados calculamos o número total de iterações(linhas X colunas) e efetuamos um loop para preencher
+	# o retangulo. Por fim, as variaveis utilizadas são zeradas.
 	.macro draw_full_rectangle($xi, $yi, $xf, $yf, $val)
 		add	s0, zero, $xi
 		add	s1, zero, $yi
@@ -154,7 +193,6 @@
 		lw 	a1, address	#endereço base heap para a1
 		
 		add 	t0, t0, a1	#posicao xiyi = endereço base + t0
-		add 	t2, t1, a1	#posicao xfyf = endereço base + t1
 		
 		sub	a2, s0, s2	#número de colunas que serão preenchidas
 		sub	a3, s3, s1	#número de linhas que serão preenchidas
@@ -164,7 +202,15 @@
 		mul  	t1, a2,	a3	#número de iterações para preenchimento Xi colunas x Yi linhas 
 		mv	t2, t0		#copia o endereço do ponto superior direito para t2
 		li	t3, 0
-
+		
+		# Loop que desenha todo o retangulo no display
+		# Continuará a preencher do ponto superior a direita até o ponto inferior a esquerda
+		# até que todas as iterações(número de linhas x colunas = t1) acabem.
+		# Desenha ponto a ponto da direita para a esquerda. A cada ponto desenhado decrementa
+		# 1 no número de iterações(t1) e incrementa 1 no contador(t3) de colunas. Quando o
+		# número de pontos atingir a coluna mais a esquerda da linha(a2) uma nova linha
+		# abaixo será criada. O desenho dessa nova linha começará a partir da coluna mais
+		# a direita(t0). Quando as iterações acabam a função clear é chamada.
 		draw_full_rectangle:
 			beq 	t1, zero, clear	# se todo a area foi preenchida retorna para o menu
 			sw 	s4, 0(t2)	#armazena o conteudo RGB informado no ponto xy do display
@@ -179,6 +225,31 @@
 			j 	draw_full_rectangle
 	.end_macro
 	
+	#-------------------------------------------------------------------------
+	# Função draw_full_rectangle: desenha um retangulo sem preenchimento no display.
+	# O retangulo é desenhado a partir de coordenadas informadas pelo usuário.
+	# Além disso, a função também recebe o valor inteiro RGB que será a cor do 
+	# contorno do retangulo.
+	#
+	# Parametros:
+	#  $xi: inteiro, coordenada do eixo vertical 1, ou seja, indica a coluna mais a direita
+	#  $yi: inteiro, coordenada do eixo horizontal 1, ou seja, indica a linha superior
+	#  $xf: inteiro, coordenada do eixo vertical 2, ou seja, indica a coluna mais a esquerda
+	#  $yf: inteiro, coordenada do eixo horizontal 2, ou seja, indica a linha inferior
+	#  $val: inteiro, valor da cor RGB do retangulo que será desenhado no display
+	#
+	# A função recebe os 5 parametros que são o par ordenado xi,yi que juntos
+	# indicam a localização do ponto inferior esquerdo e o par xf,yf que juntos indicam a 
+	# localização do ponto superior direito. Os dois pares formam o perímetro do retangulo.
+	# O quinto parâmetro é a cor da borda do retangulo. É feita uma multiplicação por 4 no xi,xf e por
+	# 256 no yi,yf usando ssli para que representem o tamanho de words. Após isso, tanto o x's
+	# quanto o y's são adicionados ao endereço base da heap para, assim, encontrar os pontos com
+	# exatidão e em seguida armazená-los, cada um, em uma word que indica o endereço da posição no display.
+	# Posteriormente, é calculado o número de linhas(yf-yi) e colunas(xi-xf) a percorrer. Com esses
+	# resultados calculamos o número total de iterações(linhas=a3) para efetuarmos o loop 
+	# para preencher a borda esquerda e direita; e o número de iterações(colunas=a2) para preencher
+	# a linha superior e a inferior. 
+	# Por fim, as variaveis utilizadas são zeradas.
 	.macro draw_empty_rectangle($xi, $yi, $xf, $yf, $val)
 		add	s0, zero, $xi
 		add	s1, zero, $yi
@@ -212,27 +283,41 @@
 		mv	t0, t2		#copia o endereço do ponto superior direito para t2
 		mv	t3, a2
 		li	s0, 1
-
+		
+		# Loop que desenha todo o retangulo sem preenchimento no display.
+		# Continuará a preencher o ponto mais a direita e o ponto mais a esquerda de cada
+		# linnha, exceto a primeira e última, até que todas as iterações(número de linhas = t1) acabem.
+		# Desenha um ponto mais a direita, um mais a esquerda na mesma linha, decrementa 1 no número 
+		# de iterações(t1) e vai para a próxima linha(t0+256).
+		# Se for a primeira ou última linha uma função para preencher a linha é acionada=draw_full_line.
 		draw_empty_rectangle:
 			beq 	t1, zero, clear	# se toda o contorno for preenchido retorna para o menu
 			beq	t1, a3, draw_full_line #se esta na primeira linha t1=a3, preenche toda linha
 			sw 	s4, 0(t2)	#armazena o conteudo RGB informado no ponto xy da borda mais a direita
 			sub	t2, t2, s1	#próximo pixel a esquerda para ser preenchido
 			sw	s4, 0(t2)	#armazena o conteudo RGB informado no ponto xy da borda mais esquerda 
-			addi	t1, t1, -1	#decrementa a quantidade de iterações= número de pontos xy
+			addi	t1, t1, -1	#decrementa a quantidade de iterações= número de linhas
 			addi	t0, t0, 256	#endereço base + 256 = próxima linha
 			mv	t2, t0		#t2=t0
 			beq	t1, s0, draw_full_line #se esta na ultima linha t1=s0, preenche toda linha
 					
 			j	draw_empty_rectangle
-		
+
+		# Preenche toda a linha, ou seja, superior ou inferior.
+		# Continuará a preencher do ponto mais a direita até o ponto mais a esquerda
+		# da linha que todas as iterações(número de linhas = t1) acabem.
+		# Desenha ponto a ponto da direita para a esquerda. A cada ponto desenhado decrementa
+		# 1 no contador(t3) de colunas. Quando o número de pontos atingir a coluna mais a esquerda
+		# da linha(t3=0) decrementa o número de iterações totais(t1), vai para a próxima linha(t0+256) 
+		# e retorna para a função que preenche os pontos a esquerda e direita= draw_empty_rectangle.
+
 		draw_full_line:
 			sw 	s4, 0(t2)	#armazena o conteudo RGB informado no ponto xy do display
 			addi	t2, t2, -4	#próximo pixel a esquerda para ser preenchido
 			addi	t3, t3, -1	#decrementa a quantidade de iterações= número de colunas
 			bgt 	t3, zero, draw_full_line # se todo a area foi preenchida retorna para o menu
 			mv	t3, a2		#t3= total de colunas para preencher outra linha em outro loop
-			addi	t1, t1, -1	#decrementa a quantidade de iterações= número de pontos xy
+			addi	t1, t1, -1	#decrementa a quantidade de iterações= número linhas
 			addi	t0, t0, 256	#t0 = endereço base + 256 = próxima linha
 			mv	t2, t0		#t2= t0
 			j	draw_empty_rectangle
@@ -304,7 +389,9 @@
 			j loop
 	.end_macro
 	
-	main:	# o intuito é permanecer no menu até o usuario digitar a opção 8
+	# Função que exibe o menu de opções e direciona para a opção escolhida.
+	# O intuito é permanecer no menu até o usuario digitar a opção 8	
+	main:
 		jal exibe_menu
 	
 		li 	a7, 5		#a7=5 -> definiÃ§Ã£o da chamada de sistema para ler opcao do usuario
@@ -336,7 +423,7 @@
 		ecall
 
 	
-	# fecha o arquivo 
+	# Fecha o arquivo após a utilização.
 	close:
 		# chamada de sistema para fechamento do arquivo
 		#parÃ¢metros da chamada de sistema: a7=57, a0=descritor do arquivo
@@ -349,13 +436,15 @@
 		li	t2, 0
 		#retorna para o menu	
 		j 	main
-	
+		
+	# Label responsável por exibir as opções do menu e retornar para main.
 	exibe_menu:
 		li	a7, 4		#a7=4 -> definiÃ§Ã£o da chamada de sistema para imprimir strings na tela
 		la	a0, str_menu	#a0=endereÃ§o da string "str_menu"
 		ecall			#realiza a chamada de sistema
 		jr 	ra
-		
+
+	# Label responsável por obter os dados e passar para a função get_point.
 	opcao_1:
 		li	a7, 4		#chamada de sistema para imprimir string
 		la	a0, str_opcao_1	#a0=endereÃ§o da string
@@ -370,7 +459,8 @@
 		mv 	t1, a0		#t1=y
 				
 		get_point(t0, t1)
-		
+	
+	# Label responsável por obter os dados e passar para a função draw_point.
 	opcao_2:
 		li	a7, 4		#chamada de sistema para imprimir string
 		la	a0, str_opcao_1	#a0=endereÃ§o da string
@@ -387,7 +477,9 @@
 		jal ler_valores_rgb
 
 		draw_point(a1, a2, a3)
-		
+	
+	# Label responsável por obter os dados através de funções auxiliares e passar para a 
+	# função draw_full_rectangle	
 	opcao_3:
 		#função que pega os valores xi's e yi's que serão informados pelo usuario
 		jal ler_valores_xi_yi
@@ -395,7 +487,9 @@
 		jal ler_valores_rgb
 		#parametros retornados pela função acima: xi, yi, xf, yf, val
 		draw_full_rectangle(a1, a2, t2, t3, a3)
-		
+	
+	# Label responsável por obter os dados através de funções auxiliares e passar para a 
+	# função draw_empty_rectangle
 	opcao_4:
 		#função que pega os valores xi's e yi's que serão informados pelo usuario
 		jal ler_valores_xi_yi
@@ -404,18 +498,21 @@
 		#parametros retornados pela função acima: xi, yi, xf, yf, val
 		draw_empty_rectangle(a1, a2, t2, t3, a3)
 
+	# Label responsável por carregar parametros e chamar a função convert_negative.
 	opcao_5:
 		# define parÃ¢metros e chama a funÃ§Ã£o para carregar a imagem
 		lw a1, address
 		lw a3, size
 		convert_negative()
-		
+	
+	# Label responsável por carregar parametros e chamar a função convert_readtones
 	opcao_6:
 		# define parÃ¢metros e chama a funÃ§Ã£o para carregar a imagem
 		lw a1, address
 		lw a3, size
 		convert_readtones()
 	
+	# Label responsável por carregar parametros e chamar a função load_image
 	opcao_7:
 		# define parÃ¢metros e chama a funÃ§Ã£o para carregar a imagem
 		la a0, image_name
@@ -423,25 +520,15 @@
 		la a2, buffer
 		lw a3, size
 		load_image(a0, a1, a2, a3)
-		
-	abrir_arquivo:
-		# salva os parÃ¢metros da funÃ§ao nos temporÃ¡rios
-		mv 	t1, a1		# endereco de carga
-		mv 	t2, a2		# buffer para leitura de um pixel do arquivo
-	
-		# chamada de sistema para abertura de arquivo
-		#parÃ¢metros da chamada de sistema: a7=1024, a0=string com o diretÃ³rio da imagem, a1 = definiÃ§Ã£o de leitura/escrita
-		li 	a7, 1024	# chamada de sistema para abertura de arquivo
-		li 	a1, 0		# Abre arquivo para leitura (pode ser 0: leitura, 1: escrita)
-		ecall			# Abre um arquivo (descritor do arquivo Ã© retornado em a0)
-		mv 	s0, a0		# salva o descritor do arquivo em s0
-	
-		mv 	a0, s0		# descritor do arquivo 
-		mv 	a1, t2		# endereÃ§o do buffer 
-		li 	a2, 3		# largura do buffer
-		
-		jr 	ra
-	
+
+	# Tem a atribuição de ler os valores inteiros R, G e B e
+	# preparar um valor RGB em hexadecimal. Os passos são:
+	# 1 - ler o valor R e armazenar em uma word de 32 bits
+	#     mover 16 bits a esquerda e deixar no formato RGB
+	# 2 - ler o valor G e armazenar em uma word de 32 bits
+	#     mover 8 bits a esquerda e deixar no formato RGB
+	# 3 - ler o valor B e armazenar em uma word de 32 bits
+	# 4 - efetuar um R or B or C para obter o RGB completo
 	ler_valores_rgb:
 		li	a7, 4		#chamada para solicitar valor de R
 		la	a0, str_valor_r	
@@ -477,7 +564,11 @@
 		or 	a3, t0, a3	#ou para unir R+(G+B) no formato 0x00FFFFFF
 		
 		jr	ra
-		
+	
+	# Tem a atribuição de obter os dados xi, yi, xf, yf e armazenar em variáveis
+	# para que funções que chamam esse label possam utilizá-las. Os dados obtidos
+	# por este rótulo fornecem as coordenadas de pontos iniciais e finais no
+	# display.
 	ler_valores_xi_yi:
 		li	a7, 4		#chamada de sistema para imprimir string
 		la	a0, str_opcao_3_4	#a0=endereÃ§o da string
@@ -501,7 +592,7 @@
 		
 		jr	ra
 
-	#zera todas as variaveis após utilizá-las
+	# Zera todas as variaveis após utilizá-las e retorna para a main
 	clear:
 		li	s0, 0
 		li	s1, 0
